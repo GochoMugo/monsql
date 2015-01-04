@@ -44,7 +44,6 @@ class Database:
         Implemented by subclasses, because different database may use different table class"""
         pass
 
-    @abc.abstractmethod
     def list_tables(self):
         """
         Return a list of lower case table names. Different databases have their own ways to 
@@ -54,12 +53,12 @@ class Database:
         all_tablenames = [row[0].lower() for row in self.cursor.fetchall()]
         return all_tablenames
 
-    @abc.abstractmethod
     def truncate_table(self, tablename):
-        """Delete all rows in a table. 
-        Not all databases support built-in truncate, so implementation is left
-        to subclasses. For those don't support truncate, 'delete from ...' is used """
-        pass
+        """
+        Use 'TRUNCATE TABLE' to truncate the given table
+        """
+        self.cursor.execute(self.__language.build("truncate_table", {table_name: tablename}))
+        self.db.commit()
 
     def get(self, name):
         """
@@ -136,7 +135,7 @@ class Database:
 
             columns_specs += ',PRIMARY KEY(%s)' %(','.join(primary_key))
 
-        sql = 'CREATE TABLE %s(%s)' %(tablename, columns_specs)
+        sql = self.__language.build("create_table", table_name=tablename, columns=columns_specs)
         self.__cursor.execute(sql)
         self.__db.commit()
 
@@ -156,9 +155,9 @@ class Database:
         if not silent and not self.is_table_existed(tablename):
             raise MonSQLException('TABLE %s DOES NOT EXIST' %tablename)
 
-        self.__cursor.execute('DROP TABLE IF EXISTS %s' %(tablename))
+        sql = self.__language.build("drop_table", table_name=tablename, if_exists="IF EXISTS")
+        self.__cursor.execute(sql)
         self.__db.commit()
-
 
     def raw(self, sql):
         """
@@ -189,6 +188,3 @@ class Database:
             structured_rows.append(DataRow(data))
 
         return structured_rows
-
-    
-
