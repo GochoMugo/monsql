@@ -38,11 +38,9 @@ class Database:
         if not self.__table_map.has_key(name):
             self.__table_map[name] = self.get_table_obj(name)
 
-    @abc.abstractmethod
     def get_table_obj(self, name):
-        """This is used internally inside the class
-        Implemented by subclasses, because different database may use different table class"""
-        pass
+        table = Table(self.db, name, self.__language, mode=self.mode)
+        return table
 
     def list_tables(self):
         """
