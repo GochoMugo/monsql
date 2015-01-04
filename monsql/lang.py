@@ -29,6 +29,9 @@ When building SQL queries, a **context** is used to derive such values.
 A context is simply a dictionary-like object with keys matching the
 placeholders in the strings. If a key is not found in the object, a
 ``MonSQLException`` is raised.
+
+Do NOTE that the common/default SQL template queries defined are biased
+to **MySQL** since this library is MySQL-first.
 '''
 
 
@@ -40,6 +43,9 @@ from .exception import MonSQLException
 common = {
   "create_table": Template("CREATE TABLE $table_name ($columns);"),
   "show_tables": Template("SHOW tables;"),
+  "truncate_table": Template("TRUNCATE TABLE $table_name;"),
+  "drop_table": Template("DROP TABLE $if_exists $table_name;"),
+  "show_columns": Template("SHOW COLUMNS FROM $table_name;"),
   "insert_record":Template("INSERT INTO $table_name ($columns) VALUES ($values);"),
   "view_record": Template("SELECT $columns FROM $table_name $discriminant;"),
   "delete_record": Template("DELETE FROM $table_name $discriminant;"),
@@ -50,16 +56,14 @@ common = {
 class SQL:
     def __init__(self, lang_dict=common):
         self.__lang_dict = deepcopy(lang_dict)
-        self.__context = None
+        self.__context = {}
 
     def define(self, dict_key, query):
         self.__lang_dict[dict_key] = Template(query)
 
-    def build(self, dict_key, context=None):
-        if context is not None:
+    def build(self, dict_key, **context):
+        if context:
             self.__context = context
-        if self.__context is None:
-            raise MonSQLException("Missing context")
         try:
             query = self.__lang_dict.get(dict_key)
             return query.substitute(self.__context)
