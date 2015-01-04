@@ -1,18 +1,21 @@
 #encoding=utf-8
 
+import abc
 from config import TRANSACTION_MODE
 from exception import MonSQLException
-from table import Table
+from lang import SQL
 from queryset import DataRow
-import abc
+from table import Table
+
 
 class Database:
     """
     Database wrapper for interaction with specific database
     """
-    def __init__(self, db, mode=TRANSACTION_MODE.DEFAULT):
+    def __init__(self, db, language=None, mode=TRANSACTION_MODE.DEFAULT):
         self.__db = db
         self.__cursor = self.__db.cursor()
+        self.__language = language if language is not None else SQL()
         self.__table_map = {}
         self.__mode = mode
 
@@ -47,7 +50,9 @@ class Database:
         Return a list of lower case table names. Different databases have their own ways to 
         do this, so leave the implementation to the subclasses
         """
-        pass
+        self.cursor.execute(self.__language.build("show_tables", context={}))
+        all_tablenames = [row[0].lower() for row in self.cursor.fetchall()]
+        return all_tablenames
 
     @abc.abstractmethod
     def truncate_table(self, tablename):

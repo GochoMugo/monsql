@@ -32,6 +32,7 @@ placeholders in the strings. If a key is not found in the object, a
 '''
 
 
+from copy import deepcopy
 from string import Template
 from .exception import MonSQLException
 
@@ -48,7 +49,7 @@ common = {
 
 class SQL:
     def __init__(self, lang_dict=common):
-        self.__lang_dict = lang_dict
+        self.__lang_dict = deepcopy(lang_dict)
         self.__context = None
 
     def define(self, dict_key, query):
@@ -60,7 +61,7 @@ class SQL:
         if self.__context is None:
             raise MonSQLException("Missing context")
         try:
-            query = common.get(dict_key)
+            query = self.__lang_dict.get(dict_key)
             return query.substitute(self.__context)
         except ValueError:
             raise MonSQLException("Missing template")

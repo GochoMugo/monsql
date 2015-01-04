@@ -30,11 +30,6 @@ class MySQL(Database):
                                     passwd=password, db=dbname)
         Database.__init__(self, db)
 
-    def list_tables(self):
-        self.cursor.execute('show tables')
-        all_tablenames = [row[0].lower() for row in self.cursor.fetchall()]
-        return all_tablenames
-
     def get_table_obj(self, name):
         table = MySQLTable(db=self.db, name=name, mode=self.mode)
         return table
