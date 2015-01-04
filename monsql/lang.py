@@ -47,22 +47,22 @@ common = {
 
 
 class SQL:
-  def __init__(self, lang_dict=common):
-    self.__lang_dict = lang_dict
-    self.__context = None
+    def __init__(self, lang_dict=common):
+        self.__lang_dict = lang_dict
+        self.__context = None
 
-  def define(self, dict_key, query):
-    self.__lang_dict[dict_key] = query
+    def define(self, dict_key, query):
+        self.__lang_dict[dict_key] = Template(query)
 
-  def build(self, dict_key, context=None):
-    if context is not None:
-      self.__context = context
-    if self.__context is None:
-      raise MonSQLException("Missing context")
-    try:
-      query = common.get(dict_key)
-      return query.substitute(self.__context)
-    except ValueError:
-      raise MonSQLException("Missing template")
-    except KeyError:
-      raise MonSQLException("Missing parameter")
+    def build(self, dict_key, context=None):
+        if context is not None:
+            self.__context = context
+        if self.__context is None:
+            raise MonSQLException("Missing context")
+        try:
+            query = common.get(dict_key)
+            return query.substitute(self.__context)
+        except ValueError:
+            raise MonSQLException("Missing template")
+        except KeyError:
+            raise MonSQLException("Missing parameter")
