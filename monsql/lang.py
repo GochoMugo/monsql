@@ -48,6 +48,7 @@ common = {
   "show_columns": Template("SHOW COLUMNS FROM $table_name;"),
   "insert_record":Template("INSERT INTO $table_name ($columns) VALUES ($values);"),
   "view_record": Template("SELECT $columns FROM $table_name $discriminant;"),
+  "count_records": Template("SELECT COUNT($count) FROM $table_name $discriminant;"),
   "delete_record": Template("DELETE FROM $table_name $discriminant;"),
   "update_record": Template("UPDATE $table_name SET $column_name = $value $discriminant;")
 }
