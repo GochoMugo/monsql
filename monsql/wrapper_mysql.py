@@ -10,17 +10,6 @@ from db import Database
 from table import Table
 from config import TRANSACTION_MODE
 
-class MySQLTable(Table):
-    
-    def fetch_columns(self):
-        sql = u"SHOW COLUMNS FROM %s" %(self.name)
-        self.cursor.execute(sql)
-        columns = []
-        for column in self.cursor.fetchall():
-            column = column[0]
-            columns.append(column)
-        self.columns = columns
-
 
 class MySQL(Database):
 
@@ -29,16 +18,3 @@ class MySQL(Database):
         db = MySQLdb.Connect(host=host, port=port, user=username,
                                     passwd=password, db=dbname)
         Database.__init__(self, db)
-
-    def get_table_obj(self, name):
-        table = MySQLTable(db=self.db, name=name, mode=self.mode)
-        return table
-
-    def truncate_table(self, tablename):
-        """
-        Use 'TRUNCATE TABLE' to truncate the given table
-        """
-        self.cursor.execute('TRUNCATE TABLE %s' %tablename)
-        self.db.commit()
-
-        
