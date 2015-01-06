@@ -5,7 +5,7 @@ from config import TRANSACTION_MODE
 from query import Query
 from queryset import QuerySet
 from sql import build_query, build_select, build_update, build_delete, build_insert
-  
+
 
 class Table:
     """
@@ -19,11 +19,12 @@ class Table:
     columns = None
     name = None
 
-    def __init__(self, db, name, mode=None):
+    def __init__(self, db, name, language, mode=None):
         self.db = db
         self.cursor = db.cursor()
         self.columns = None
         self.name = name
+        self.language = language
 
         if mode:
             self.transaction_mode = mode
@@ -31,7 +32,6 @@ class Table:
             self.transaction_mode = TRANSACTION_MODE.DEFAULT
 
         self.logger = Logger("std")
-
 
     def columns():
         doc = "The columns property."
@@ -45,11 +45,14 @@ class Table:
 
     columns = property(**columns())
 
-
-    @abc.abstractmethod
     def fetch_columns(self):
-        pass
-
+        sql = self.language.build("show_columns", table_name=self.name)
+        self.cursor.execute(sql)
+        columns = []
+        for column in self.cursor.fetchall():
+            column = column[0]
+            columns.append(column)
+        self.columns = columns
 
     def __ensure_columns(self):
         if self.columns is not None:
@@ -57,20 +60,18 @@ class Table:
         self.fetch_columns()
         return True
 
-
     def commit(self):
         """
         Ends current transaction, making permanent any changes made.
         """
         self.db.commit()
         return self
-    
 
     def count(self, query=None, distinct=False, distinct_fields=None):
         """
         Returns the number of rows satisying a criteria, if provided.
-        
-        :Parameters: 
+
+        :Parameters:
 
         - query: specify the WHERE clause
         - distinct : boolean, whether to use DISTINCT()
@@ -103,6 +104,8 @@ class Table:
             if query_str:
                 sql = sql + ' WHERE ' + query_str
 
+        #sql = self.language.build("count_records", table_name=self.name,
+        #               count=count_str, discriminant=discriminant)
         self.cursor.execute(sql)
         count = self.cursor.fetchone()[0]
 
@@ -153,7 +156,6 @@ class Table:
 
         query_obj = Query(source=self.name, filter=filter, fields=fields, skip=skip, limit=limit, sort=sort)
         return QuerySet(cursor=self.cursor, query=query_obj)
-    
 
     def find_one(self, filter=None, fields=None, skip=0, sort=None):
         """
@@ -165,7 +167,6 @@ class Table:
             return result[0]
         else:
             return None
-
 
     def insert(self, data_or_list_of_data):
         """
