@@ -7,8 +7,8 @@ data storage and prototyping for applications.
 
 
 import sqlite3
+import sqlstr
 from db import Database
-from lang import SQL
 from table import Table
 
 class SQLite3Table(Table):
@@ -23,15 +23,11 @@ class SQLite3Table(Table):
         self.columns = columns
 
 
-sqlite3Lang = SQL()
-sqlite3Lang.define("show_tables", "SELECT name FROM sqlite_master WHERE type = 'table' ")
-
-
 class SQLite3(Database):
     def __init__(self, file_path=None):
         if file_path is None: file_path = ":memory:"
         db = sqlite3.connect(file_path)
-        Database.__init__(self, db, language=sqlite3Lang)
+        Database.__init__(self, db, language=sqlstr.SQLite3())
 
     def get_table_obj(self, name):
         table = SQLite3Table(db=self.db, name=name, mode=self.mode)
@@ -43,5 +39,3 @@ class SQLite3(Database):
         """
         self.get(tablename).remove()
         self.db.commit()
-
-        

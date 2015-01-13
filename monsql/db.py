@@ -3,7 +3,6 @@
 import abc
 from config import TRANSACTION_MODE
 from exception import MonSQLException
-from lang import SQL
 from queryset import DataRow
 from table import Table
 
@@ -12,10 +11,10 @@ class Database:
     """
     Database wrapper for interaction with specific database
     """
-    def __init__(self, db, language=None, mode=TRANSACTION_MODE.DEFAULT):
+    def __init__(self, db, language, mode=TRANSACTION_MODE.DEFAULT):
         self.__db = db
         self.__cursor = self.__db.cursor()
-        self.__language = language if language is not None else SQL()
+        self.__language = language
         self.__table_map = {}
         self.__mode = mode
 

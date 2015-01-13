@@ -6,6 +6,7 @@ The World's "most" popular open source database
 
 
 import MySQLdb
+import sqlstr
 from db import Database
 from table import Table
 from config import TRANSACTION_MODE
@@ -17,4 +18,4 @@ class MySQL(Database):
                  dbname='test', mode=TRANSACTION_MODE.DEFAULT):
         db = MySQLdb.Connect(host=host, port=port, user=username,
                                     passwd=password, db=dbname)
-        Database.__init__(self, db)
+        Database.__init__(self, db, language=sqlstr.MySQL())
