@@ -1,0 +1,3 @@
+[submodule "sqlstr"]
+    path = monsql/sqlstr
+    url = https://github.com/GochoMugo/sql-string-templating.git
